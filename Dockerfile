@@ -10,5 +10,8 @@ COPY . .
 # Ensure the gradlew script is executable
 RUN chmod +x gradlew
 
+# Build the application
+RUN ./gradlew build --no-daemon
+
 # Start the application using the gradle wrapper and apprun task
-CMD ["./gradlew", "apprun"]
+ENTRYPOINT ["./gradlew", "apprun"]
