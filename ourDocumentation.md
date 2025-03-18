@@ -1,8 +1,6 @@
 # Documentation
 
-- Each one of the group members created a Dockerfile to build an image and created a pull request, which can be seen on GitHub  
-- \*Take screenshot of the 3 different pull requests  
-- We decided to merge one of the pull requests
+- Each member of the group created a Dockerfile to build an image. However, we decided to go with one of the images and created a pull request, as the chosen image was cross-platform compatible
 - This is the link to our [image](https://hub.docker.com/repository/docker/mirzahb/crossplatformimg/general)
 
 ## Workflow
@@ -15,7 +13,7 @@
    - First command: using the official gradle image with the appropriate jdk and gradle version according to d2l instructions  
    - Second command is creating a working directory inside our image which defaults the directory to home/gradle/project so all the commands will run inside the project folder  
    - Third command: we are copying everything from the root folder to our project folder inside our image  
-   - Foutr command the command RUN chmod \+x gradlew sets the execute permission on the gradlew script so it can be run as an executable within the container  
+   - Fourth command the command RUN chmod \+x gradlew sets the execute permission on the gradlew script so it can be run as an executable within the container  
    - Last command tells the image to run the app as long as it starts  
    - Note: to be able to see the app running on local host 8080 we have to run the image in the interactive mode and map image port 8080 to our local port 8080 we can use the following command to do so:  
      `docker run -it -p 8080:8080 <image name>`  
@@ -25,7 +23,7 @@
 - We used the following command to build our image to be cross-platform:  
 
   ```bash
-  docker build . -t ensf400-demo:1.0.0
+  docker buildx build --platform linux/amd64,linux/arm64 -t <image name> .
   ```
 
 ![image2][image2]
@@ -36,7 +34,7 @@
 
 - We deleted all the old local images and any running containers to make sure we pulled and ran the new image![image4][image4]  
   - We ran the container “running instance of the image” in interactive mode and exposed port 8080 on our local machine to make sure the app is running correctly with the container:  
-    `docker run -it -p 8080:8080 mirzahb/ensf400-demo:1.0.0`
+    `docker run -it -p 8080:8080 <image name>`
 
   ![image2][image2]
   ![image4][image4]
