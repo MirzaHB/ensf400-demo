@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+     agent {
+        docker {
+            image 'openjdk:11'
+        }
+    }
 
     environment {
         // Existing environment variable for tests
