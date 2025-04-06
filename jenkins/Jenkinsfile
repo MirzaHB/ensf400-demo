@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        docker {image 'gradle:7.5.1-jdk11'}
-    }
+    agent any
 
     environment {
         // Define DockerHub image name
@@ -19,7 +17,9 @@ pipeline {
         stage('Verify JAVA_HOME') {
     steps {
         sh 'echo $JAVA_HOME'  // Check the value of JAVA_HOME
-        sh 'java -version'    // Verify the Java version being used
+        sh 'java -version'
+        ah 'docker --version'
+    // Verify the Java version being used
     }
 }
 
