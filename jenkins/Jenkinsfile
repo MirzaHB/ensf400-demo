@@ -1,19 +1,14 @@
 pipeline {
     agent any
-    }
 
     environment {
-        // Existing environment variable for tests
         HTTP_PROXY = 'http://127.0.0.1:9888'
-        // Set your Docker Hub repository name (replace with your actual username/app)
         IMAGE_NAME = 'mirzahb/crossplatformimg'
-    }
-    tools {
-        jdk 'JDK-17' // Must match the name you set in Global Tool Configuration
     }
 
     stages {
-       stage('Check Java Version') {
+
+        stage('Check Java Version') {
             steps {
                 script {
                     docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
@@ -22,17 +17,24 @@ pipeline {
                 }
             }
         }
-        // Build the WAR file (binary)
+
         stage('Build') {
             steps {
-                sh './gradlew clean assemble'
+                script {
+                    docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                        sh './gradlew clean assemble'
+                    }
+                }
             }
         }
 
-        // Run unit tests
         stage('Unit Tests') {
             steps {
-                sh './gradlew test'
+                script {
+                    docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                        sh './gradlew test'
+                    }
+                }
             }
             post {
                 always {
@@ -41,10 +43,13 @@ pipeline {
             }
         }
 
-        // Run database integration tests
         stage('Database Tests') {
             steps {
-                sh './gradlew integrate'
+                script {
+                    docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                        sh './gradlew integrate'
+                    }
+                }
             }
             post {
                 always {
@@ -53,11 +58,14 @@ pipeline {
             }
         }
 
-        // Run BDD tests and generate reports/coverage
         stage('BDD Tests') {
             steps {
-                sh './gradlew generateCucumberReports'
-                sh './gradlew jacocoTestReport'
+                script {
+                    docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                        sh './gradlew generateCucumberReports'
+                        sh './gradlew jacocoTestReport'
+                    }
+                }
             }
             post {
                 always {
@@ -66,29 +74,38 @@ pipeline {
             }
         }
 
-        // Perform static code analysis with SonarQube
         stage('Static Analysis') {
             steps {
-                sh './gradlew sonarqube'
-                sleep 5
-                sh './gradlew checkQualityGate'
+                script {
+                    docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                        sh './gradlew sonarqube'
+                        sleep 5
+                        sh './gradlew checkQualityGate'
+                    }
+                }
             }
         }
 
-        // Deploy the built artifact to a test environment
         stage('Deploy to Test') {
             steps {
-                sh './gradlew deployToTestWindowsLocal'
-                sh 'PIPENV_IGNORE_VIRTUALENVS=1 pipenv install'
-                sh './gradlew waitForHeartBeat'
-                sh 'curl http://zap/JSON/core/action/newSession -s --proxy localhost:9888'
+                script {
+                    docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                        sh './gradlew deployToTestWindowsLocal'
+                        sh 'PIPENV_IGNORE_VIRTUALENVS=1 pipenv install'
+                        sh './gradlew waitForHeartBeat'
+                        sh 'curl http://zap/JSON/core/action/newSession -s --proxy localhost:9888'
+                    }
+                }
             }
         }
 
-        // Run API tests
         stage('API Tests') {
             steps {
-                sh './gradlew runApiTests'
+                script {
+                    docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                        sh './gradlew runApiTests'
+                    }
+                }
             }
             post {
                 always {
@@ -97,11 +114,14 @@ pipeline {
             }
         }
 
-        // Run UI BDD tests and generate reports
         stage('UI BDD Tests') {
             steps {
-                sh './gradlew runBehaveTests'
-                sh './gradlew generateCucumberReport'
+                script {
+                    docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                        sh './gradlew runBehaveTests'
+                        sh './gradlew generateCucumberReport'
+                    }
+                }
             }
             post {
                 always {
@@ -110,10 +130,13 @@ pipeline {
             }
         }
 
-        // Run traditional UI tests
         stage('UI Tests') {
             steps {
-                sh 'cd src/ui_tests/java && ./gradlew clean test'
+                script {
+                    docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                        sh 'cd src/ui_tests/java && ./gradlew clean test'
+                    }
+                }
             }
             post {
                 always {
@@ -122,63 +145,72 @@ pipeline {
             }
         }
 
-        // Run security dependency analysis
         stage('Security: Dependency Analysis') {
             steps {
-                sh './gradlew dependencyCheckAnalyze'
+                script {
+                    docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                        sh './gradlew dependencyCheckAnalyze'
+                    }
+                }
             }
         }
 
-        // Run performance tests using JMeter
         stage('Performance Tests') {
             steps {
-                sh './gradlew runPerfTests'
+                script {
+                    docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                        sh './gradlew runPerfTests'
+                    }
+                }
             }
         }
 
-        // Run mutation tests
         stage('Mutation Tests') {
             steps {
-                sh './gradlew pitest'
+                script {
+                    docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                        sh './gradlew pitest'
+                    }
+                }
             }
         }
 
-        // Build the project documentation (e.g., Javadoc)
         stage('Build Documentation') {
             steps {
-                sh './gradlew javadoc'
+                script {
+                    docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                        sh './gradlew javadoc'
+                    }
+                }
             }
         }
 
-        // Collect the ZAP security report
         stage('Collect Zap Security Report') {
             steps {
-                sh 'mkdir -p build/reports/zap'
-                sh 'curl http://zap/OTHER/core/other/htmlreport --proxy localhost:9888 > build/reports/zap/zap_report.html'
+                script {
+                    docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                        sh 'mkdir -p build/reports/zap'
+                        sh 'curl http://zap/OTHER/core/other/htmlreport --proxy localhost:9888 > build/reports/zap/zap_report.html'
+                    }
+                }
             }
         }
 
-        // ========================
-        // New Docker Image Stages
-        // ========================
-
-        // Build Docker image with tag based on the current commit hash
         stage('Build Docker Image') {
             when {
                 branch 'master'
             }
             steps {
                 script {
-                    // Retrieve the short commit hash for tagging
                     def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                     env.IMAGE_TAG = commitHash
-                    // Build the Docker image using the Dockerfile in the repo
-                    sh "docker build -it ${IMAGE_NAME}:${IMAGE_TAG} ."
+                    docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                        sh "docker build -it ${IMAGE_NAME}:${IMAGE_TAG} ."
+                    }
                 }
             }
         }
 
-        // Push the Docker image to Docker Hub
         stage('Push Docker Image') {
             when {
                 branch 'master'
@@ -186,20 +218,25 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     script {
-                        sh '''
-                            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                            docker push ${IMAGE_NAME}:${IMAGE_TAG}
-                        '''
+                        docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                            sh '''
+                                echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                                docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                            '''
+                        }
                     }
                 }
             }
         }
 
-        // Simulate deployment to production (demo token step)
         stage('Deploy to Prod') {
             steps {
-                sh 'sleep 5'
+                script {
+                    docker.image('openjdk:11-jdk').inside("-v /var/run/docker.sock:/var/run/docker.sock") {
+                        sh 'sleep 5'
+                    }
+                }
             }
         }
-    }
-}
+    } // end of stages
+} // end of pipeline
