@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Define DockerHub image name
-        DOCKER_IMAGE =  'mirzahb/crossplatformimg'
+        DOCKER_IMAGE =  'mohamadhammoud1/ensf400-final'
     }
 
     stages {
