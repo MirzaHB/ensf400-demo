@@ -11,7 +11,7 @@ pipeline {
         stage('Check Java Version') {
             steps {
                 script {
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh 'java --version'
                     }
                 }
@@ -21,7 +21,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh './gradlew clean assemble'
                     }
                 }
@@ -31,7 +31,7 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 script {
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh './gradlew test'
                     }
                 }
@@ -46,7 +46,7 @@ pipeline {
         stage('Database Tests') {
             steps {
                 script {
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh './gradlew integrate'
                     }
                 }
@@ -61,7 +61,7 @@ pipeline {
         stage('BDD Tests') {
             steps {
                 script {
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh './gradlew generateCucumberReports'
                         sh './gradlew jacocoTestReport'
                     }
@@ -77,7 +77,7 @@ pipeline {
         stage('Static Analysis') {
             steps {
                 script {
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh './gradlew sonarqube'
                         sleep 5
                         sh './gradlew checkQualityGate'
@@ -89,7 +89,7 @@ pipeline {
         stage('Deploy to Test') {
             steps {
                 script {
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh './gradlew deployToTestWindowsLocal'
                         sh 'PIPENV_IGNORE_VIRTUALENVS=1 pipenv install'
                         sh './gradlew waitForHeartBeat'
@@ -102,7 +102,7 @@ pipeline {
         stage('API Tests') {
             steps {
                 script {
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh './gradlew runApiTests'
                     }
                 }
@@ -117,7 +117,7 @@ pipeline {
         stage('UI BDD Tests') {
             steps {
                 script {
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh './gradlew runBehaveTests'
                         sh './gradlew generateCucumberReport'
                     }
@@ -133,7 +133,7 @@ pipeline {
         stage('UI Tests') {
             steps {
                 script {
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh 'cd src/ui_tests/java && ./gradlew clean test'
                     }
                 }
@@ -148,7 +148,7 @@ pipeline {
         stage('Security: Dependency Analysis') {
             steps {
                 script {
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh './gradlew dependencyCheckAnalyze'
                     }
                 }
@@ -158,7 +158,7 @@ pipeline {
         stage('Performance Tests') {
             steps {
                 script {
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh './gradlew runPerfTests'
                     }
                 }
@@ -168,7 +168,7 @@ pipeline {
         stage('Mutation Tests') {
             steps {
                 script {
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh './gradlew pitest'
                     }
                 }
@@ -178,7 +178,7 @@ pipeline {
         stage('Build Documentation') {
             steps {
                 script {
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh './gradlew javadoc'
                     }
                 }
@@ -188,7 +188,7 @@ pipeline {
         stage('Collect Zap Security Report') {
             steps {
                 script {
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh 'mkdir -p build/reports/zap'
                         sh 'curl http://zap/OTHER/core/other/htmlreport --proxy localhost:9888 > build/reports/zap/zap_report.html'
                     }
@@ -204,7 +204,7 @@ pipeline {
                 script {
                     def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                     env.IMAGE_TAG = commitHash
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh "docker build -it ${IMAGE_NAME}:${IMAGE_TAG} ."
                     }
                 }
@@ -218,7 +218,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     script {
-                        docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                        docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                             sh '''
                                 echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
                                 docker push ${IMAGE_NAME}:${IMAGE_TAG}
@@ -232,7 +232,7 @@ pipeline {
         stage('Deploy to Prod') {
             steps {
                 script {
-                    docker.image('openjdk:11-jdk').inside("--user root -v /var/run/docker.sock:/var/run/docker.sock") {
+                    docker.image('openjdk:11-jdk').inside("--privileged --user root -v /var/run/docker.sock:/var/run/docker.sock") {
                         sh 'sleep 5'
                     }
                 }
