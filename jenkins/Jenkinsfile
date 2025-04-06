@@ -31,8 +31,12 @@ pipeline {
                 }
         stage('Build and Test') {
             steps {
-                // Run Gradle build and tests
-                sh './gradlew clean build'
+                script {
+                    // Run Gradle build inside a Docker container that uses Java 11
+                    docker.image('gradle:7.5.1-jdk11').inside {
+                        sh './gradlew clean build'
+                    }
+                }
             }
         }
 
