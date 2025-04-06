@@ -16,6 +16,11 @@ pipeline {
     
 
     stages {
+      stage('Print Environment') {
+          steps {
+              sh 'env'
+          }
+      }
       stage('Debug Environment') {
           steps {
               sh 'echo "JAVA_HOME=$JAVA_HOME"'
