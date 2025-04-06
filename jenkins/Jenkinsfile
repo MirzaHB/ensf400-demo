@@ -7,11 +7,19 @@ pipeline {
         // Set your Docker Hub repository name (replace with your actual username/app)
         IMAGE_NAME = 'mirzahb/crossplatformimg'
         JAVA_HOME = "/usr/local/sdkman/candidates/java/11.0.26-ms"
-        PATH = "${JAVA_HOME}/bin:${env.PATH}"
+    PATH = "${JAVA_HOME}/bin:${env.PATH}"
     }
     
 
     stages {
+      stage('Debug Environment') {
+          steps {
+              sh 'echo "JAVA_HOME=$JAVA_HOME"'
+              sh 'echo "PATH=$PATH"'
+              sh 'java -version'
+          }
+      }
+
       stage('Check JAVA_HOME Directory') {
             steps {
                 sh 'ls -ld /usr/local/sdkman/candidates/java/11.0.26-ms'
