@@ -1,202 +1,48 @@
 pipeline {
-    // Use a Docker container based on OpenJDK 11 for the entire pipeline
-    agent {
-        docker {
-            image 'openjdk:11'
-            // Uncomment the following line if you need to run docker commands inside the container:
-            // args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
-    
-    // Optional environment variables (JAVA_HOME is often set automatically in the container)
+    agent any
+
     environment {
-        HTTP_PROXY = 'http://127.0.0.1:9888'
-        IMAGE_NAME = 'mirzahb/crossplatformimg'
-        // Setting JAVA_HOME explicitly if needed
-        JAVA_HOME = "/usr/local/openjdk-11"
-        // Ensure our container’s bin is first in PATH
-        PATH = "${JAVA_HOME}/bin:${env.PATH}"
+        // Define DockerHub image name
+        DOCKER_IMAGE =  'mirzahb/crossplatformimg'
     }
-    
+
     stages {
-        stage('Print Environment') {
+        stage('Checkout') {
             steps {
-                sh 'env'
+                // Checkout the code from GitHub
+                checkout scm
             }
         }
-        stage('Debug Environment') {
+
+        stage('Build and Test') {
             steps {
-                sh 'echo "JAVA_HOME=$JAVA_HOME"'
-                sh 'echo "PATH=$PATH"'
-                sh 'java -version'
+                // Run Gradle build and tests
+                sh './gradlew clean build'
             }
         }
-        stage('Check JAVA_HOME Directory') {
-            steps {
-                // In the official openjdk:11 image, JAVA_HOME may differ.
-                // You can list the root of the image to verify:
-                sh 'ls -ld /usr/local/'
-            }
-        }
-        stage('Print Java Version') {
-            steps {
-                sh 'java -version'
-            }
-        }
-        // Build the WAR file (binary)
-        stage('Build') {
-            steps {
-                sh './gradlew clean assemble'
-            }
-        }
-        // Run unit tests
-        stage('Unit Tests') {
-            steps {
-                sh './gradlew test'
-            }
-            post {
-                always {
-                    junit 'build/test-results/test/*.xml'
-                }
-            }
-        }
-        // Run database integration tests
-        stage('Database Tests') {
-            steps {
-                sh './gradlew integrate'
-            }
-            post {
-                always {
-                    junit 'build/test-results/integrate/*.xml'
-                }
-            }
-        }
-        // Run BDD tests and generate reports/coverage
-        stage('BDD Tests') {
-            steps {
-                sh './gradlew generateCucumberReports'
-                sh './gradlew jacocoTestReport'
-            }
-            post {
-                always {
-                    junit 'build/test-results/bdd/*.xml'
-                }
-            }
-        }
-        // Perform static code analysis with SonarQube
-        stage('Static Analysis') {
-            steps {
-                sh './gradlew sonarqube'
-                sleep 5
-                sh './gradlew checkQualityGate'
-            }
-        }
-        // Deploy the built artifact to a test environment
-        stage('Deploy to Test') {
-            steps {
-                sh './gradlew deployToTestWindowsLocal'
-                sh 'PIPENV_IGNORE_VIRTUALENVS=1 pipenv install'
-                sh './gradlew waitForHeartBeat'
-                sh 'curl http://zap/JSON/core/action/newSession -s --proxy localhost:9888'
-            }
-        }
-        // Run API tests
-        stage('API Tests') {
-            steps {
-                sh './gradlew runApiTests'
-            }
-            post {
-                always {
-                    junit 'build/test-results/api_tests/*.xml'
-                }
-            }
-        }
-        // Run UI BDD tests and generate reports
-        stage('UI BDD Tests') {
-            steps {
-                sh './gradlew runBehaveTests'
-                sh './gradlew generateCucumberReport'
-            }
-            post {
-                always {
-                    junit 'build/test-results/bdd_ui/*.xml'
-                }
-            }
-        }
-        // Run traditional UI tests
-        stage('UI Tests') {
-            steps {
-                sh 'cd src/ui_tests/java && ./gradlew clean test'
-            }
-            post {
-                always {
-                    junit 'src/ui_tests/java/build/test-results/test/*.xml'
-                }
-            }
-        }
-        // Run security dependency analysis
-        stage('Security: Dependency Analysis') {
-            steps {
-                sh './gradlew dependencyCheckAnalyze'
-            }
-        }
-        // Run performance tests using JMeter
-        stage('Performance Tests') {
-            steps {
-                sh './gradlew runPerfTests'
-            }
-        }
-        // Run mutation tests
-        stage('Mutation Tests') {
-            steps {
-                sh './gradlew pitest'
-            }
-        }
-        // Build the project documentation (e.g., Javadoc)
-        stage('Build Documentation') {
-            steps {
-                sh './gradlew javadoc'
-            }
-        }
-        // Collect the ZAP security report
-        stage('Collect Zap Security Report') {
-            steps {
-                sh 'mkdir -p build/reports/zap'
-                sh 'curl http://zap/OTHER/core/other/htmlreport --proxy localhost:9888 > build/reports/zap/zap_report.html'
-            }
-        }
-        // Docker Image Stages
-        stage('Build Docker Image') {
-            when {
-                branch 'moe/branch'
-            }
+
+        stage('Docker Build') {
             steps {
                 script {
-                    def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                    env.IMAGE_TAG = commitHash
-                    sh "docker build -it ${IMAGE_NAME}:${IMAGE_TAG} ."
+                    // Build the Docker image
+                    docker.build("${DOCKER_IMAGE}")
                 }
             }
         }
-        stage('Push Docker Image') {
-            when {
-                branch 'moe/branch'
-            }
+
+        stage('Push to DockerHub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    script {
-                        sh '''
-                            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                            docker push ${IMAGE_NAME}:${IMAGE_TAG}
-                        '''
+                script {
+                    // Login to DockerHub using credentials stored in Jenkins
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                        docker.image("${DOCKER_IMAGE}").push()
                     }
                 }
             }
         }
-        stage('Deploy to Prod') {
-            steps {
-                sh 'sleep 5'
-            }
-        }
     }
 }
+
+
+
+
