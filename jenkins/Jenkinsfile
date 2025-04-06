@@ -4,7 +4,8 @@ pipeline {
     environment {
         // Define DockerHub image name
         DOCKER_IMAGE =  'mohamadhammoud1/ensf400-final'
-        JAVA_HOME = '/usr/lib/jvm/java-11-openjdk-amd64'
+          JAVA_HOME = '/usr/lib/jvm/java-11-openjdk-amd64'
+          PATH = "${JAVA_HOME}/bin:${env.PATH}" 
     }
 
     stages {
