@@ -153,7 +153,7 @@ pipeline {
         // Build Docker image with tag based on the current commit hash
         stage('Build Docker Image') {
             when {
-                branch 'master'
+                branch 'moe/branch'
             }
             steps {
                 script {
@@ -169,7 +169,7 @@ pipeline {
         // Push the Docker image to Docker Hub
         stage('Push Docker Image') {
             when {
-                branch 'master'
+                branch 'moe/branch'
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
