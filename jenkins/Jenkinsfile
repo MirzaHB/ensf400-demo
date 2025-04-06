@@ -6,7 +6,7 @@ pipeline {
         HTTP_PROXY = 'http://127.0.0.1:9888'
         // Set your Docker Hub repository name (replace with your actual username/app)
         IMAGE_NAME = 'mirzahb/crossplatformimg'
-        JAVA_HOME = "/usr/local/sdkman/candidates/java/current"
+        JAVA_HOME = "/usr/local/sdkman/candidates/java/11.0.26-ms"
         PATH = "${JAVA_HOME}/bin:${env.PATH}"
     }
     
