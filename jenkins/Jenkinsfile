@@ -10,6 +10,11 @@ pipeline {
     
 
     stages {
+       stage('Print Java Version') {
+            steps {
+                sh 'java -version'
+            }
+        }
         // Build the WAR file (binary)
         stage('Build') {
             steps {
