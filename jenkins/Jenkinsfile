@@ -18,7 +18,7 @@ pipeline {
     steps {
         sh 'echo $JAVA_HOME'  // Check the value of JAVA_HOME
         sh 'java -version'
-        ah 'docker --version'
+        sh 'docker --version'
     // Verify the Java version being used
     }
 }
