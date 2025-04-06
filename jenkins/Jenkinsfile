@@ -12,6 +12,12 @@ pipeline {
     
 
     stages {
+      stage('Check JAVA_HOME Directory') {
+            steps {
+                sh 'ls -ld /usr/local/sdkman/candidates/java/11.0.26-ms'
+            }
+        }
+
        stage('Print Java Version') {
             steps {
                 sh 'java -version'
