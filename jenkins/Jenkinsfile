@@ -24,15 +24,36 @@ pipeline {
                         sh 'docker --version' // Check the Java version being used
                     }
         }
-        stage('Test') {
+        stage('Unit Tests') {
             steps {
                 script {
                     docker.image('gradle:7.5.1-jdk11').inside {
                         sh './gradlew test'
                         }
                     }
+                }
+            post {
+                always {
+                    junit 'build/test-results/test/*.xml'
+                    }
+                }
+            
             }
-        }
+        stage('Database Tests') {
+            steps {
+                script {
+                    docker.image('gradle:7.5.1-jdk11').inside {
+                        sh './gradlew integrate'
+                        }
+                    }
+                }
+            post {
+                always {
+                     junit 'build/test-results/integrate/*.xml'
+                    }
+                }
+            
+            }
         
 
         stage('Docker Build') {
