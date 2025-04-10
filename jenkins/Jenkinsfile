@@ -54,6 +54,41 @@ pipeline {
                 }
             
             }
+            stage('BDD Tests') {
+            steps {
+                script {
+                    docker.image('gradle:7.5.1-jdk11').inside {
+                        sh './gradlew generateCucumberReports'
+                        // generate the code coverage report for jacoco
+                        sh './gradlew jacocoTestReport'
+                        }
+                    }
+                }
+            post {
+                always {
+                     junit 'build/test-results/bdd/*.xml'
+                    }
+                }
+            
+            }
+            stage('Static Analysis') {
+            steps {
+                script {
+                    docker.image('gradle:7.5.1-jdk11').inside {
+                        sh './gradlew sonarqube'
+                        sleep 5
+                        sh './gradlew checkQualityGate'
+                        }
+                    }
+                }
+            post {
+                always {
+                     junit 'build/test-results/bdd/*.xml'
+                    }
+                }
+            
+            }
+        
         
 
         stage('Docker Build') {
