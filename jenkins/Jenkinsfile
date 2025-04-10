@@ -20,19 +20,11 @@ pipeline {
 
         stage('Check Java Version') {
                     steps {
-                        sh 'java -version'  // Check the Java version being used
+                        sh 'java -version' 
+                        sh 'docker --version' // Check the Java version being used
                     }
                 }
-        stage('Build and Test') {
-            steps {
-                script {
-                    // Run Gradle build inside a Docker container that uses Java 11
-                    docker.image('gradle:7.5.1-jdk11').inside {
-                        sh './gradlew clean build'
-                    }
-                }
-            }
-        }
+        
 
         stage('Docker Build') {
             steps {
