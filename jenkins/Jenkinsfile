@@ -14,7 +14,7 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Verify JAVA_HOME') {
+        
    
 
 
