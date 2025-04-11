@@ -4,7 +4,7 @@ pipeline {
     environment {
         // Define DockerHub image name
         DOCKER_IMAGE =  'mohamadhammoud1/ensf400-final'
-       // SONAR_TOKEN = credentials('fea5c5001704e1386d886d65347bc94b38b432c7') // Jenkins credential ID
+       
          
     }
 
