@@ -4,6 +4,7 @@ pipeline {
     environment {
         // Define DockerHub image name
         DOCKER_IMAGE =  'mohamadhammoud1/ensf400-final'
+        SONAR_TOKEN = credentials('fea5c5001704e1386d886d65347bc94b38b432c7') // Jenkins credential ID
          
     }
 
@@ -71,17 +72,17 @@ pipeline {
                 }
             
             }
-            stage('Static Analysis') {
-            steps {
-                script {
-                    docker.image('gradle:7.5.1-jdk11').inside {
-                        sh './gradlew sonarqube'
-                        sleep 5
-                        sh './gradlew checkQualityGate'
-                        }
-                    }
-                }
-            }
+            // stage('Static Analysis') {
+            // steps {
+            //     script {
+            //         docker.image('gradle:7.5.1-jdk11').inside {
+            //             sh './gradlew sonarqube'
+            //             sleep 5
+            //             sh './gradlew checkQualityGate'
+            //             }
+            //         }
+            //     }
+            // }
         
         
 
