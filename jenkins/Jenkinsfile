@@ -1,6 +1,12 @@
 pipeline {
     agent any
+     
+    triggers { githubPullRequest() }
 
+    
+    when {
+        changeRequest()
+    }
     environment {
         // Define DockerHub image name
         DOCKER_IMAGE =  'mohamadhammoud1/ensf400-final'
