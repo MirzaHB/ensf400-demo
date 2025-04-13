@@ -2,30 +2,17 @@ pipeline {
     agent any
      
     environment {
-        // Define DockerHub image name
-        DOCKER_IMAGE =  'mohamadhammoud1/ensf400-final'
-       
-         
+        DOCKER_IMAGE =  'mohamadhammoud1/ensf400-final'   
     }
      
 
     stages {
-        stage('Checkout') {
-           
+        stage('Checkout') { 
             steps {
                 checkout scm
             }
         }
         
-   
-
-
-        stage('Check Java Version') {
-                steps {
-                        sh 'java -version' 
-                        sh 'docker --version' 
-                    }
-        }
         stage('Unit Tests') {
             steps {
                 script {
@@ -61,7 +48,6 @@ pipeline {
                 script {
                     docker.image('gradle:7.5.1-jdk11').inside {
                         sh './gradlew generateCucumberReports'
-                        // generate the code coverage report for jacoco
                         sh './gradlew jacocoTestReport'
                         }
                     }
@@ -73,25 +59,14 @@ pipeline {
                 }
             
             }
-            // stage('Static Analysis') {
-            // steps {
-            //     script {
-            //         docker.image('gradle:7.5.1-jdk11').inside {
-            //             sh './gradlew sonarqube'
-            //             sleep 5
-            //             sh './gradlew checkQualityGate'
-            //             }
-            //         }
-            //     }
-            // }
-        
-        
 
         stage('Docker Build') {
             steps {
                 script {
-                    // Build the Docker image
-                    docker.build("${DOCKER_IMAGE}")
+                   
+                     def commitHash = env.GIT_COMMIT.take(7)
+                     def taggedImage = "${DOCKER_IMAGE}:${commitHash}"
+                    docker.build("${taggedImage}")
                 }
             }
         }
