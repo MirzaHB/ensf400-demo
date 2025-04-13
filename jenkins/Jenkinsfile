@@ -16,8 +16,10 @@ pipeline {
 
     stages {
         stage('Checkout') {
+            when {
+                changeRequest()
+            }
             steps {
-                // Checkout the code from GitHub
                 checkout scm
             }
         }
